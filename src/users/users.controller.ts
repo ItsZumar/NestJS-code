@@ -4,54 +4,55 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get() // Get /users or /users?role=value
+  // Get /users or /users?role=value
+  @Get()
   findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
     return this.usersService.findAll(role);
   }
 
-  @Get(':id') // Get /users/:id
-  findOne(@Param('id') id: string) {
+  // Get /users/:id
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
     //params type string
-    return this.usersService.findOne(+id); // unary + convert str to num
+    return this.usersService.findOne(id); // unary + convert str to num
   }
 
-  @Post() // Post /users
+  // Post /users
+  @Post()
   create(
-    @Body()
-    user: {
-      name: string;
-      email: string;
-      role: 'INTERN' | 'ENGINEER' | 'ADMIN';
-    },
+    @Body(ValidationPipe)
+    createUserDto: CreateUserDto,
   ) {
-    return this.usersService.create(user);
+    return this.usersService.create(createUserDto);
   }
 
-  @Patch(':id') // Patch /users/:id
+  // Patch /users/:id
+  @Patch(':id')
   update(
-    @Param('id') id: string,
-    @Body()
-    updatedUser: {
-      name?: string;
-      email?: string;
-      role?: 'INTERN' | 'ENGINEER' | 'ADMIN';
-    },
+    @Param('id', ParseIntPipe) id: number,
+    @Body(ValidationPipe)
+    updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.update(+id, updatedUser);
+    return this.usersService.update(id, updateUserDto);
   }
 
-  @Delete(':id') // Delete /users/:id
-  delete(@Param('id') id: string) {
-    return this.usersService.delete(+id);
+  // Delete /users/:id
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.delete(id);
   }
 }
